@@ -1,55 +1,50 @@
 package org.fges.m1.ppc;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import java.util.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
-public class PersonneController{
-  public PersonneService service;
+import java.util.List;
+import java.util.Optional;
 
-  public PersonneController(PersonneSercice service){
-    this.service = service;
-  }
+@RestController
+@RequestMapping(path = "/tp1/personnes")
+public class PersonneController {
 
-  @GetMapping
-  public List<Personne> AllPersons(){
-    return service.findAll();
-  }
+    private final PersonneService personneService;
 
-  public String détails(Personne id){
-    for(Personne p : service){
-      if(p.getId() == id){
-        p.toString();
-      }
+    public PersonneController(PersonneService personneService) {
+        this.personneService = personneService;
     }
-  }
 
-
-  public void ajouter(Personne p){
-    service.addPersonne(p);
-  }
-
-  public void supprimer(int id){
-    service.removePersonne(id);
-  }
-
-
-  //Remplace l'utilisateur ayant comme identifiant id, par la personne new
-  public void remplacer(int id, Personne new){
-    for(Personne p : service){
-      if(p.getId() == id){
-        service.remove(p);
-        service.add(new);
-      }
+    @GetMapping
+    public List<Personne> getAll() {
+        return personneService.getPersonnes();
     }
-  }
+
+    @GetMapping("/{id}")
+    public Optional<Personne> getPersonneById(@PathVariable("id") int personneId) {
+        return personneService.getPersonneById(personneId);
+    }
+
+    @DeleteMapping("/{id}")
+    public void removePersonneById(@PathVariable("id") int personneId) {
+        personneService.removePersonne(personneId);
+    }
+
+    @PutMapping("/{id}")
+    public Personne modifyPersonneById(@PathVariable("id") int personneId, @RequestBody PersonneDto personne) {
+        return personneService.modifyPersonne(new Personne(personneId, personne.getNom(), personne.getPrenom()));
+    }
+
+    @PostMapping
+    public Personne addPersonne(@RequestBody Personne personne) {
+        return personneService.addPersonne(personne);
+    }
 }
+
